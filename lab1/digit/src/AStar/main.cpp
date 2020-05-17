@@ -124,10 +124,9 @@ int main(int argc, char **argv)
 
 	clock_t time_start = clock();
 	AStar astar_solver(init_state, dest_state);
+	Node dest_node = astar_solver.Solve();
 	clock_t time_end = clock();
 	int time_run = time_end - time_start;
-
-	Node dest_node = astar_solver.Solve();
 	output_result(dest_node, outfile_path, time_run);
 
 	// test_output();

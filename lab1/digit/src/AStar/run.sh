@@ -1,2 +1,2 @@
 make
-./solver ../../input/init1.txt ../../input/dest.txt
+./solver.out ../../input/init1.txt ../../input/dest.txt
