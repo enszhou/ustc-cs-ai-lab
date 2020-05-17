@@ -126,7 +126,8 @@ int main(int argc, char **argv)
 	AStar astar_solver(init_state, dest_state);
 	Node dest_node = astar_solver.Solve();
 	clock_t time_end = clock();
-	int time_run = time_end - time_start;
+	int time_run = (int)(((double)(time_end - time_start)) / CLOCKS_PER_SEC * 1000);
+	// cout << CLOCKS_PER_SEC << ' ' << time_end - time_start << endl;
 	output_result(dest_node, outfile_path, time_run);
 
 	// test_output();
