@@ -1,11 +1,8 @@
 CC = g++
-obj = Digit.o main.o AStar.o
+obj = main.o AStar.o
 
 solver: $(obj)
 	$(CC) $(obj) -o $@
-
-Digit.o: Digit.cpp
-	$(CC) -c $^ -o $@
 
 main.o: main.cpp
 	$(CC) -c $^ -o $@

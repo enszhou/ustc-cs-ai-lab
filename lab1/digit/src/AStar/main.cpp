@@ -4,7 +4,7 @@
 #include <vector>
 #include <cstring>
 #include <algorithm>
-#include <stdlib.h>
+#include <time.h>
 #include "AStar.h"
 
 using namespace std;
@@ -40,7 +40,7 @@ void test_output()
 	}
 }
 
-void output_result(Node &dest_node, string outfile_path)
+void output_result(Node &dest_node, string outfile_path, int time_run)
 {
 	ofstream outfile(outfile_path);
 	vector<int> path;
@@ -51,6 +51,7 @@ void output_result(Node &dest_node, string outfile_path)
 	}
 	reverse(path.begin(), path.end());
 
+	cout << "running time: " << time_run / (3600000) << "h " << time_run % 3600000 / 60000 << "m " << time_run % 60000 / 1000 << "s " << time_run % 1000 << "ms" << endl;
 	cout << path.size() << " steps";
 	// outfile << path.size() << " steps" << endl;
 
@@ -121,9 +122,13 @@ int main(int argc, char **argv)
 	init_infile.close();
 	dest_infile.close();
 
+	clock_t time_start = clock();
 	AStar astar_solver(init_state, dest_state);
+	clock_t time_end = clock();
+	int time_run = time_end - time_start;
+
 	Node dest_node = astar_solver.Solve();
-	output_result(dest_node, outfile_path);
+	output_result(dest_node, outfile_path, time_run);
 
 	// test_output();
 
