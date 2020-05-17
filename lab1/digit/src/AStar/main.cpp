@@ -82,7 +82,7 @@ int main(int argc, char **argv)
 	outfile_path = init_infile_path;
 	string filename = init_infile_path.substr(init_infile_path.find_last_of('/') + 1);
 	string filedir = init_infile_path.substr(0, init_infile_path.find_last_of('/'));
-	outfile_path = filedir + "/../output/" + filename;
+	outfile_path = filedir + "/../output/astar_" + filename;
 	// cout << outfile_path << endl;
 
 	ifstream init_infile(init_infile_path);

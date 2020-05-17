@@ -1,7 +1,7 @@
 CC = g++
 obj = main.o AStar.o
 
-solver.out: $(obj)
+astar_solver.out: $(obj)
 	$(CC) $(obj) -o $@
 
 main.o: main.cpp
@@ -11,4 +11,4 @@ AStar.o: AStar.cpp
 	$(CC) -c $^ -o $@
 
 clean: 
-	rm -f solver.out $(obj)
+	rm -f astar_solver.out $(obj)

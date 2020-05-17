@@ -5,7 +5,7 @@
 #include <cstring>
 #include <algorithm>
 #include <time.h>
-#include "AStar.h"
+#include "IDAStar.h"
 
 using namespace std;
 
@@ -13,32 +13,6 @@ unsigned char init_cells[5][5];
 unsigned char dest_cells[5][5];
 unsigned char init_state[23];
 unsigned char dest_state[23];
-
-void test_output()
-{
-	for (int i = 0; i < 5; i++)
-	{
-		for (int j = 0; j < 5; j++)
-		{
-			printf("%d ", init_cells[i][j]);
-		}
-		cout << endl;
-	}
-	cout << endl;
-	for (int i = 0; i < 5; i++)
-	{
-		for (int j = 0; j < 5; j++)
-		{
-			printf("%d ", dest_cells[i][j]);
-		}
-		cout << endl;
-	}
-	cout << endl;
-	for (int i = 0; i < 23; i++)
-	{
-		printf("%d ", dest_state[i]);
-	}
-}
 
 void output_result(Node &dest_node, string outfile_path, int time_run)
 {
@@ -76,13 +50,10 @@ int main(int argc, char **argv)
 		dest_infile_path = argv[2];
 	}
 
-	// init_infile_path = "D:/2020Spring/AI/lab/lab1/digit/input/init3.txt";
-	// dest_infile_path = "D:/2020Spring/AI/lab/lab1/digit/input/dest.txt";
-
 	outfile_path = init_infile_path;
 	string filename = init_infile_path.substr(init_infile_path.find_last_of('/') + 1);
 	string filedir = init_infile_path.substr(0, init_infile_path.find_last_of('/'));
-	outfile_path = filedir + "/../output/" + filename;
+	outfile_path = filedir + "/../output/idastar_" + filename;
 	// cout << outfile_path << endl;
 
 	ifstream init_infile(init_infile_path);
@@ -123,25 +94,12 @@ int main(int argc, char **argv)
 	dest_infile.close();
 
 	clock_t time_start = clock();
-	AStar astar_solver(init_state, dest_state);
-	Node dest_node = astar_solver.Solve();
-
+	IDAStar idastar_solver(init_state, dest_state);
+	Node dest_node = idastar_solver.Solve();
 	clock_t time_end = clock();
-	int time_run = time_end - time_start;
+	int time_run = (int)(((double)(time_end - time_start)) / CLOCKS_PER_SEC * 1000);
+
 	output_result(dest_node, outfile_path, time_run);
 
-	// test_output();
-
-	/* vector<Node> children;
-	Node node = astar_solver.PopMinNode();
-	astar_solver.Expand(node, children);
-	for (auto child : children)
-	{
-		for (int i = 0; i < 23; i++)
-		{
-			printf("%d ", child.state[i]);
-		}
-		cout << endl;
-	}*/
 	return 0;
 }

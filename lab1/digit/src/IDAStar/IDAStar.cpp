@@ -1,54 +1,58 @@
-#include "AStar.h"
+#include "IDAStar.h"
 #include <cstring>
 #include <iostream>
+#include <climits>
 
 using namespace std;
 
-AStar::AStar(unsigned char(&init_state)[23], unsigned char(&dest_state)[23])
+IDAStar::IDAStar(unsigned char (&init_state)[23], unsigned char (&dest_state)[23])
 {
-	Node* init_node = new Node;
+	Node *init_node = new Node;
 	memcpy(this->dest_state, dest_state, 23);
 	memcpy(init_node->state, init_state, 23);
 	init_node->action = 255;
 	init_node->cost_g = 0;
 	init_node->cost_f = init_node->cost_g + H(init_node->state);
 	init_node->parent = NULL;
-	// hash_fringe.emplace(init_node);
 	fringe.emplace(init_node);
+	all_nodes.emplace(init_node);
 }
 
-AStar::~AStar()
+IDAStar::~IDAStar()
 {
-	Node* p;
-	while (!fringe.empty())
-	{
-		p = fringe.top();
-		fringe.pop();
-		delete p;
-	}
-	for (auto p : closed)
-		delete p;
+	FreeList();
 }
 
-unsigned short AStar::Distance(int corr1, int corr2)
+void IDAStar::FreeList()
+{
+	Node *p;
+	closed.clear();
+	for (auto p : all_nodes)
+		delete p;
+	all_nodes.clear();
+}
+
+unsigned short IDAStar::Distance(int corr1, int corr2)
 {
 	return abs(corr1 / 5 - corr2 / 5) + abs(corr1 % 5 - corr2 % 5);
 }
 
-unsigned short AStar::H(unsigned char(&state)[23])
+unsigned short IDAStar::H(unsigned char (&state)[23])
 {
 	int sum = 0;
 	sum += 3 * Distance(dest_state[7], state[7]);
 
-	for (int i = 1; i < 22; i++) {
+	for (int i = 1; i < 22; i++)
+	{
 
-		if (i == 7)continue;
+		if (i == 7)
+			continue;
 		sum += Distance(dest_state[i], state[i]);
 	}
 	return sum;
 }
 
-void AStar::NormalState(unsigned char(&state)[23])
+void IDAStar::NormalState(unsigned char (&state)[23])
 {
 	int temp;
 	if (state[0] > state[22])
@@ -59,9 +63,9 @@ void AStar::NormalState(unsigned char(&state)[23])
 	}
 }
 
-Node AStar::PopMinNode()
+Node IDAStar::PopMinNode()
 {
-	Node* p_min_node;
+	Node *p_min_node;
 	Node min_node;
 	while (true)
 	{
@@ -73,9 +77,9 @@ Node AStar::PopMinNode()
 			p_min_node->parent->num_children_fringe--;
 			if (p_min_node->parent->is_in_closed == false)
 			{
-				if (p_min_node->parent->num_children_fringe == 0)
-					delete p_min_node->parent;
-				delete p_min_node;
+				// if (p_min_node->parent->num_children_fringe == 0)
+				// 	delete p_min_node->parent;
+				// delete p_min_node;
 				continue;
 			}
 		}
@@ -83,12 +87,12 @@ Node AStar::PopMinNode()
 		auto search = closed.find(p_min_node);
 		if (search != closed.end()) //exist
 		{
-			delete p_min_node;
+			// delete p_min_node;
 		}
 		else
 		{
 			min_node = *p_min_node;
-			delete p_min_node;
+			// delete p_min_node;
 			break;
 		}
 	}
@@ -96,15 +100,15 @@ Node AStar::PopMinNode()
 	return min_node;
 }
 
-void AStar::Expand(Node& parent, vector<Node>& children)
+void IDAStar::Expand(Node &parent, vector<Node> &children)
 {
-	vector<pair<int, int>> sevens{ {parent.state[7] / 5, parent.state[7] % 5},         // right-down 0
+	vector<pair<int, int>> sevens{{parent.state[7] / 5, parent.state[7] % 5},		  // right-down 0
 								  {parent.state[7] / 5 - 1, parent.state[7] % 5 - 1}, // left-up 1
-								  {parent.state[7] / 5 - 1, parent.state[7] % 5} };    // center 2
+								  {parent.state[7] / 5 - 1, parent.state[7] % 5}};	  // center 2
 	bool flag;
 	//the two spaces
 	int zero_row, zero_col, row, col, zero_corr, k;
-	int spaces[2] = { 0, 22 };
+	int spaces[2] = {0, 22};
 	for (auto space : spaces)
 	{
 		zero_corr = parent.state[space]; // 0 or 22
@@ -168,7 +172,7 @@ void AStar::Expand(Node& parent, vector<Node>& children)
 		flag = true;
 		child.state[7] = parent.state[7] - 1;
 		child.state[0] = parent.state[7] - 5; // 2
-		child.state[22] = parent.state[7];    // 0
+		child.state[22] = parent.state[7];	  // 0
 		child.action = 4 * 7 + 0;
 	}
 	else if (sevens[2].first - 1 == zero_larger_corr / 5 && sevens[2].second == zero_larger_corr % 5 && sevens[1].first - 1 == zero_smaller_corr / 5 && sevens[1].second == zero_smaller_corr % 5)
@@ -176,7 +180,7 @@ void AStar::Expand(Node& parent, vector<Node>& children)
 		flag = true;
 		child.state[7] = parent.state[7] - 5;
 		child.state[0] = parent.state[7] - 6; // 1
-		child.state[22] = parent.state[7];    // 0
+		child.state[22] = parent.state[7];	  // 0
 		child.action = 4 * 7 + 1;
 	}
 	else if (sevens[0].first == zero_larger_corr / 5 && sevens[0].second + 1 == zero_larger_corr % 5 && sevens[2].first == zero_smaller_corr / 5 && sevens[2].second + 1 == zero_smaller_corr % 5)
@@ -184,7 +188,7 @@ void AStar::Expand(Node& parent, vector<Node>& children)
 		flag = true;
 		child.state[7] = parent.state[7] + 1;
 		child.state[0] = parent.state[7] - 6; // 1
-		child.state[22] = parent.state[7];    // 0
+		child.state[22] = parent.state[7];	  // 0
 		child.action = 4 * 7 + 2;
 	}
 	else if (sevens[0].first + 1 == zero_larger_corr / 5 && sevens[0].second == zero_larger_corr % 5 && sevens[1].first + 1 == zero_smaller_corr / 5 && sevens[1].second == zero_smaller_corr % 5)
@@ -204,17 +208,10 @@ void AStar::Expand(Node& parent, vector<Node>& children)
 	}
 }
 
-//void AStar::LinkChildren(Node& parent, std::vector<Node>& children) {
-//	parent.child = &(children.front);
-//	for (auto child = children.begin(); child != children.end(); child++) {
-//
-//	}
-//}
-
-void AStar::FreshClosed(vector<Node>& children)
+void IDAStar::FreshClosed(vector<Node> &children)
 {
-	Node* p;
-	for (auto child = children.begin(); child != children.end(); )
+	Node *p;
+	for (auto child = children.begin(); child != children.end();)
 	{
 		auto search = closed.find(&(*child));
 		if (search != closed.end())
@@ -235,49 +232,16 @@ void AStar::FreshClosed(vector<Node>& children)
 	}
 }
 
-void AStar::DealRemovedParent(Node* p) {
-	//SetChildrenTag(p);
+void IDAStar::DealRemovedParent(Node *p)
+{
 	// TODO
 	//delete p;
 	p->is_in_closed = false;
 }
-//void AStar::SetChildrenTag(Node* parent) {
-//	for (Node* p = parent->child; p != NULL; p = p->sibling) {
-//		p->parent = NULL;
-//	}
-//
-//}
 
-//void AStar::FreshFringe(Node& parent, vector<Node>& children)
-//{
-//	if (children.empty()) {
-//		parent.child = NULL;
-//		return;
-//	}
-//	Node* new_node, * pre;
-//	//first node
-//	new_node = new Node;
-//	*new_node = children[0];
-//	new_node->sibling = NULL;
-//	fringe.emplace(new_node);
-//	pre = new_node;
-//
-//	int n = children.size();
-//	for (int i = 1; i < n; i++)
-//	{
-//		new_node = new Node;
-//		*new_node = children[i];
-//		new_node->sibling = pre;
-//		fringe.emplace(new_node);
-//		pre = new_node;
-//	}
-//	parent.child = pre;
-//	return;
-//}
-
-void AStar::FreshFringe(Node& parent, vector<Node>& children)
+void IDAStar::FreshFringe(Node &parent, vector<Node> &children)
 {
-	Node* new_node;
+	Node *new_node;
 	int n = children.size();
 	parent.num_children_fringe = n;
 	parent.is_in_closed = true;
@@ -286,11 +250,12 @@ void AStar::FreshFringe(Node& parent, vector<Node>& children)
 		new_node = new Node;
 		*new_node = children[i];
 		fringe.emplace(new_node);
+		all_nodes.emplace(new_node);
 	}
 	return;
 }
 
-bool AStar::isStateEqual(unsigned char(&state1)[23], unsigned char(&state2)[23])
+bool IDAStar::isStateEqual(unsigned char (&state1)[23], unsigned char (&state2)[23])
 {
 	for (int j = 0; j < 23; j++)
 	{
@@ -300,21 +265,46 @@ bool AStar::isStateEqual(unsigned char(&state1)[23], unsigned char(&state2)[23])
 	return true;
 }
 
-Node AStar::Solve()
+
+Node IDAStar::Solve()
 {
-	Node min_node = PopMinNode();
-	Node* new_min_node;
-	while (!isStateEqual(min_node.state, dest_state))
+	Node *new_min_node;
+	Node init_node, min_node;
+	int f_limit, next_f_limit;
+
+	init_node = PopMinNode();
+	f_limit = init_node.cost_f;
+	while (f_limit < INT_MAX)
 	{
-		vector<Node> children;
+		cout << f_limit << endl;
+		next_f_limit = INT_MAX;
 		new_min_node = new Node;
-		*new_min_node = min_node;
-		closed.emplace(new_min_node);
-		Expand(*new_min_node, children);
-		FreshClosed(children);
-		FreshFringe(*new_min_node, children);
-		min_node = PopMinNode();
-		//cout << closed.size() << ' ' << endl;
+		*new_min_node = init_node;
+		fringe.emplace(new_min_node);
+		all_nodes.emplace(new_min_node);
+		while (!fringe.empty())
+		{
+			min_node = PopMinNode();
+			if (min_node.cost_f > f_limit)
+			{
+				next_f_limit = next_f_limit > min_node.cost_f ? min_node.cost_f : next_f_limit;
+			}
+			else
+			{
+				if (isStateEqual(min_node.state, dest_state))
+					return min_node;
+				vector<Node> children;
+				new_min_node = new Node;
+				*new_min_node = min_node;
+				closed.emplace(new_min_node);
+				all_nodes.emplace(new_min_node);
+				Expand(*new_min_node, children);
+				FreshClosed(children);
+				FreshFringe(*new_min_node, children);
+			}
+		}
+		FreeList();
+		f_limit = next_f_limit;
 	}
-	return min_node;
+	return init_node;
 }

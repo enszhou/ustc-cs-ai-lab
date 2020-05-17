@@ -1,14 +1,14 @@
 CC = g++
-obj = main.o AStar.o
+obj = main.o IDAStar.o
 
-solver.out: $(obj)
+idastar_solver.out: $(obj)
 	$(CC) $(obj) -o $@
 
 main.o: main.cpp
 	$(CC) -c $^ -o $@
 
-AStar.o: AStar.cpp
+IDAStar.o: IDAStar.cpp
 	$(CC) -c $^ -o $@
 
 clean: 
-	rm -f solver.out $(obj)
+	rm -f idastar_solver.out $(obj)
