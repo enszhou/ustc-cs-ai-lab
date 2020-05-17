@@ -4,6 +4,7 @@
 #include <vector>
 #include <cstring>
 #include <algorithm>
+#include <stdlib.h>
 #include "AStar.h"
 
 using namespace std;
@@ -39,38 +40,49 @@ void test_output()
 	}
 }
 
-void output_result(Node& dest_node)
+void output_result(Node &dest_node, string outfile_path)
 {
+	ofstream outfile(outfile_path);
 	vector<int> path;
-	Node* p;
+	Node *p;
 	for (p = &dest_node; p->parent != NULL; p = p->parent)
 	{
 		path.emplace_back(p->action);
 	}
 	reverse(path.begin(), path.end());
-	cout << path.size() << " steps" << endl;
+
+	cout << path.size() << " steps";
+	// outfile << path.size() << " steps" << endl;
+
 	for (auto step : path)
 	{
-		cout << '(' << step / 4 << ',' << direcions[step % 4] << ')' << endl;
+		// cout << '(' << step / 4 << ',' << direcions[step % 4] << ')' << endl;
+		outfile << '(' << step / 4 << ',' << direcions[step % 4] << ')' << endl;
 	}
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
-	string init_infile_path, dest_infile_path;
+	string init_infile_path, dest_infile_path, outfile_path;
 	if (argc < 3)
 	{
-	    cout << "Please specify the input file: ";
-	    cin >> init_infile_path >> dest_infile_path;
+		cout << "Please specify the input file: ";
+		cin >> init_infile_path >> dest_infile_path;
 	}
 	else
 	{
-	    init_infile_path = argv[1];
-	    dest_infile_path = argv[2];
+		init_infile_path = argv[1];
+		dest_infile_path = argv[2];
 	}
 
 	// init_infile_path = "D:/2020Spring/AI/lab/lab1/digit/input/init3.txt";
 	// dest_infile_path = "D:/2020Spring/AI/lab/lab1/digit/input/dest.txt";
+
+	outfile_path = init_infile_path;
+	string filename = init_infile_path.substr(init_infile_path.find_last_of('/') + 1);
+	string filedir = init_infile_path.substr(0, init_infile_path.find_last_of('/'));
+	outfile_path = filedir + "/../output/" + filename;
+	// cout << outfile_path << endl;
 
 	ifstream init_infile(init_infile_path);
 	ifstream dest_infile(dest_infile_path);
@@ -111,11 +123,11 @@ int main(int argc, char** argv)
 
 	AStar astar_solver(init_state, dest_state);
 	Node dest_node = astar_solver.Solve();
-	output_result(dest_node);
+	output_result(dest_node, outfile_path);
 
 	// test_output();
 
-   /* vector<Node> children;
+	/* vector<Node> children;
 	Node node = astar_solver.PopMinNode();
 	astar_solver.Expand(node, children);
 	for (auto child : children)
